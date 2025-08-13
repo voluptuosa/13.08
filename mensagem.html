@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mensagem</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+      font-family: "Times New Roman", serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 20px;
+      text-align: center;
+      user-select: none;
+      overflow: hidden;
+      position: relative;
+      color: white;
+    }
+    #container {
+      position: relative;
+      z-index: 10;
+      max-width: 600px;
+      padding: 30px 40px;
+      border-radius: 15px;
+    }
+    #message-text {
+      font-size: 1.3em;
+      line-height: 1.6em;
+      color: white;
+      user-select: text;
+    }
+    button {
+      margin-top: 30px;
+      font-size: 28px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: white;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: scale(1.3);
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="heartCanvas"></canvas>
+  <div id="container">
+    <div id="message-text">
+      13.08.2025<br><br>
+
+      Um mês da minha maior certeza, logo eu, que sou completamente indecisa. Não tenho palavras para descrever como meu coração palpita nervoso só de pensar em você, e não sou capaz de pôr em palavras quão feliz me sinto apenas por ser sua.<br><br>
+
+      Eu adoro pensar em como tudo e todos os caminhos pareciam nos levar para onde estamos hoje. E é por isso que eu sou fascinada em nossa história. Eu agradeço todos os dias por você não ter desistido de mim em todas as vezes em que eu não te dava nenhuma liberdade. Graças a você, todos os meus dias depois do dia sete de junho tem sido mais felizes, mais completos e repletos de paz.<br><br>
+
+      Quem imaginaria que eu, a maior hater de Victor Hugo Marchesi, viria a me tornar mulher de tal, e o mais absurdo: que treme e passa mal só de pensar em não tê-lo mais.<br><br>
+
+      É apenas um mês, mas sinto como se estivéssemos vivenciando anos. É apenas um mês, mas eu me sinto amada por uma vida toda.<br>
+      Estou falando de apenas um mês, que na verdade são 31 dias; que são 768 horas, que se tornam 46.080 minutos e por fim, contabilizam 2.764.800 segundos. Que apesar de enormes em números que, para mim, são exorbitantemente maiores.<br><br>
+
+      Queria conseguir externar tudo que sinto e penso quando estou falando de você, meu amor. Mas eu viro uma boba, fico fora de mim, perco meus sentidos quando se trata de você. Obrigada por nunca desistir de mim. E obrigada por me amar tanto. Eu sou fascinada pela sua existência.<br><br>
+
+      Eu te amo, meu ébano.
+    </div>
+    <button onclick="window.location.href='/13.08/index.html'">💌</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("heartCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let width, height;
+
+    function resizeCanvas() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    resizeCanvas();
+    window.addEventListener("resize", () => {
+      resizeCanvas();
+    });
+
+    function drawHeart(x, y, size, alpha = 1) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(size / 100, size / 100);
+      ctx.beginPath();
+      ctx.moveTo(75, 40);
+      ctx.bezierCurveTo(75, 37, 70, 25, 50, 25);
+      ctx.bezierCurveTo(20, 25, 20, 62.5, 20, 62.5);
+      ctx.bezierCurveTo(20, 80, 40, 102, 75, 120);
+      ctx.bezierCurveTo(110, 102, 130, 80, 130, 62.5);
+      ctx.bezierCurveTo(130, 62.5, 130, 25, 100, 25);
+      ctx.bezierCurveTo(85, 25, 75, 37, 75, 40);
+      ctx.closePath();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = "pink";
+      ctx.fill();
+      ctx.restore();
+    }
+
+    const particles = [];
+
+    const totalParticles = 200;
+
+    function createParticle() {
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: Math.random() * 4 + 3,
+        alpha: Math.random() * 0.5 + 0.5,
+        speedX: (Math.random() - 0.5) * 0.3,
+        speedY: (Math.random() - 0.5) * 0.3
+      };
+    }
+
+    function initParticles() {
+      particles.length = 0;
+      for (let i = 0; i < totalParticles; i++) {
+        particles.push(createParticle());
+      }
+    }
+
+    function updateParticles() {
+      for (const p of particles) {
+        p.x += p.speedX;
+        p.y += p.speedY;
+
+        if (p.x < 0) p.x = width;
+        else if (p.x > width) p.x = 0;
+
+        if (p.y < 0) p.y = height;
+        else if (p.y > height) p.y = 0;
+      }
+    }
+
+    function animate(time) {
+      ctx.clearRect(0, 0, width, height);
+      for (const p of particles) {
+        drawHeart(p.x, p.y, p.size, p.alpha);
+      }
+      updateParticles();
+      requestAnimationFrame(animate);
+    }
+
+    initParticles();
+    animate(0);
+  </script>
+</body>
+</html>

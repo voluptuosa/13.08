@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Eu te amo</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+      overflow: hidden;
+      font-family: "Times New Roman", serif;
+      color: pink;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      user-select: none;
+      position: relative;
+    }
+    canvas {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      width: 100vw;
+      height: 80vh;
+    }
+    #content {
+      position: relative;
+      z-index: 10;
+      margin-top: 65vh;
+      text-align: center;
+      width: 100%;
+    }
+    #message {
+      font-size: 2em;
+      margin: 0;
+    }
+    button {
+      margin-top: 15px;
+      font-size: 30px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: pink;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: scale(1.2);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="heartCanvas"></canvas>
+
+  <div id="content">
+    <div id="message">Eu te amo, Victor Hugo.</div>
+    <button onclick="window.location.href='/13.08/mensagem.html'">💌</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("heartCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let width, height, centerX, centerY;
+
+    function resizeCanvas() {
+      width = window.innerWidth;
+      height = window.innerHeight * 0.8;
+      centerX = width / 2;
+      centerY = height / 2;
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    resizeCanvas();
+    window.addEventListener("resize", () => {
+      resizeCanvas();
+      initStaticParticles();
+    });
+
+    function heartFunction(t) {
+      const x = 16 * Math.pow(Math.sin(t), 3);
+      const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+      return { x: x * 10, y: y * 10 };
+    }
+
+    function drawHeart(x, y, size, alpha = 1) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(size / 100, size / 100);
+      ctx.beginPath();
+      ctx.moveTo(75, 40);
+      ctx.bezierCurveTo(75, 37, 70, 25, 50, 25);
+      ctx.bezierCurveTo(20, 25, 20, 62.5, 20, 62.5);
+      ctx.bezierCurveTo(20, 80, 40, 102, 75, 120);
+      ctx.bezierCurveTo(110, 102, 130, 80, 130, 62.5);
+      ctx.bezierCurveTo(130, 62.5, 130, 25, 100, 25);
+      ctx.bezierCurveTo(85, 25, 75, 37, 75, 40);
+      ctx.closePath();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = "pink";
+      ctx.fill();
+      ctx.restore();
+    }
+
+    const staticParticles = [];
+    const movingParticles = [];
+
+    const totalStatic = 2000;
+    const totalMoving = 100;
+
+    function initStaticParticles() {
+      staticParticles.length = 0;
+
+      for (let i = 0; i < totalStatic; i++) {
+        const t = Math.random() * Math.PI * 2;
+        const heart = heartFunction(t);
+        const spread = Math.pow(Math.random(), 0.6);
+        const offsetX = (Math.random() - 0.5) * 80 * spread;
+        const offsetY = (Math.random() - 0.5) * 80 * spread;
+
+        staticParticles.push({
+          baseX: centerX + heart.x + offsetX,
+          baseY: centerY + heart.y + offsetY,
+          floatOffset: Math.random() * Math.PI * 2,
+          size: Math.random() * 4 + 3,
+          alpha: Math.random() * 0.5 + 0.5,
+          speed: Math.random() * 0.002 + 0.001
+        });
+      }
+    }
+
+    function createMovingParticle() {
+      const angle = Math.random() * 2 * Math.PI;
+      const radius = Math.max(width, height) * 0.6;
+
+      const startX = centerX + Math.cos(angle) * radius;
+      const startY = centerY + Math.sin(angle) * radius;
+
+      const target = heartFunction(Math.random() * Math.PI * 2);
+      const targetX = centerX + target.x;
+      const targetY = centerY + target.y;
+
+      return {
+        x: startX,
+        y: startY,
+        targetX,
+        targetY,
+        size: Math.random() * 4 + 3,
+        alpha: 0,
+        speed: 0.02 + Math.random() * 0.015
+      };
+    }
+
+    function updateMovingParticles() {
+      while (movingParticles.length < totalMoving) {
+        movingParticles.push(createMovingParticle());
+      }
+
+      for (let i = movingParticles.length - 1; i >= 0; i--) {
+        const p = movingParticles[i];
+        const dx = p.targetX - p.x;
+        const dy = p.targetY - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 5) {
+          movingParticles.splice(i, 1);
+          continue;
+        }
+
+        p.x += dx * p.speed;
+        p.y += dy * p.speed;
+        p.alpha = Math.min(p.alpha + 0.02, 1);
+      }
+    }
+
+    function animate(time) {
+      ctx.clearRect(0, 0, width, height);
+
+      for (const p of staticParticles) {
+        const float = Math.sin(time * p.speed + p.floatOffset) * 4;
+        drawHeart(p.baseX, p.baseY + float, p.size, p.alpha);
+      }
+
+      updateMovingParticles();
+      for (const p of movingParticles) {
+        drawHeart(p.x, p.y, p.size, p.alpha);
+      }
+
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(animate);
+    }
+
+    initStaticParticles();
+    animate(0);
+  </script>
+</body>
+</html>
